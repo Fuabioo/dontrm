@@ -9,6 +9,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 // Define a set of known top-level system paths
@@ -48,7 +50,7 @@ func main() {
 	args := os.Args[1:]
 	if len(args) > 0 {
 		if args[0] == "version" {
-			println("DON'T rm!", version)
+			println(lipgloss.NewStyle().Bold(true).Render("DON'T rm!"), version)
 			return
 		}
 	}

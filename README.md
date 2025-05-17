@@ -23,9 +23,6 @@ rm() {
 
 ## Build from source
 
-Currently there are no dependencies outside the go standard library
-required to compile this project.
-
 ```sh
 go install
 ```
