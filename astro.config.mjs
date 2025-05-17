@@ -3,8 +3,11 @@ import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import catppuccin from "@catppuccin/starlight";
 
+const isGithubPages = process.env.GITHUB_PAGES === "true";
+
 // https://astro.build/config
 export default defineConfig({
+  base: isGithubPages ? "/dontrm/" : "/",
   integrations: [
     starlight({
       title: "dontrm",
