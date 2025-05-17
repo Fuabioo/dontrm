@@ -7,12 +7,16 @@ hero:
   image:
     file: ../../assets/commands.svg
   actions:
-    - text: How I nuked my PC
+    - text: Download
+      link: /#installation
+      icon: download
+    - text: Watch how I nuked my PC 😅
       link: https://youtu.be/p4vBR1WoLYc
       icon: youtube
+      variant: secondary
       attrs:
         target: _blank
-    - text: Read the install script
+    - text: You should always read the install script
       link: https://github.com/Fuabioo/dontrm/blob/page-main/public/install.sh
       icon: external
       variant: minimal
@@ -20,9 +24,55 @@ hero:
         target: _blank
 ---
 
+import { Code } from '@astrojs/starlight/components';
 import { Steps } from '@astrojs/starlight/components';
 
-#### Installation
+## Why?
+
+It is often said that Linux gives you the power to do ANYTHING you want.
+That is quite literally true. You might think that the `rm` command prevents you to remove
+the system root, which is more or less true.
+Even if you cancel the command 0.5 seconds after it began it is already too late.
+
+This tool will help you prevent you from f****ng yourself.
+[As I have done many times in the past](https://github.com/Fuabioo/dontrm/blob/main/main.go#L147).
+
+##### Base example everyone knows
+
+`rm` won't let you just remove the root unless you provide the `--no-preserve-root` flag e.g.
+
+export const exampleCode1 = `sudo rm -fr --no-preserve-root /`;
+export const fileName1 = 'malicious-shell-script.sh';
+export const highlights = ['--no-preserve-root'];
+
+<Code code={exampleCode1} lang="sh" title={fileName1} mark={highlights} />
+
+##### Glob patterns
+
+However, you might not know that `/*` actually resolves differently.
+It resolves in all the contents using a glob pattern and thus it won't be
+protected by the `--no-preserve-root` flag.
+
+**THIS WILL DESTROY YOUR SYSTEM!** ⚠️
+
+export const exampleCode2 = `sudo rm -fr --no-preserve-root /*`;
+export const fileName2 = 'super-duper-malicious-shell-script.sh';
+
+<Code code={exampleCode2} lang="sh" title={fileName2} mark={highlights} />
+
+##### Victim of `sudo`
+
+Depending on what you have done recently in your shell session, you don't
+even need to provide `sudo` e.g.
+
+export const exampleCode3 = `
+sudo echo 'henlo fren'
+rm -fr --no-preserve-root /*`;
+export const fileName3 = 'hyper-malicious-shell-script.sh';
+
+<Code code={exampleCode3} lang="sh" title={fileName3} mark={highlights} />
+
+## Installation
 
 <Steps>
 
@@ -52,4 +102,17 @@ import { Steps } from '@astrojs/starlight/components';
    }
    ```
 
+   ```sh
+   rm version
+   ```
+
 </Steps>
+
+## Disclaimer
+
+This is only a `rm` wrapper, under the hood it only validates the input to prevent any
+accidental removal that would normally pass without trouble on `rm`.
+The only difference added to the CLI is that a new `version` command was added to:
+
+- Give visibility of what version you have installed (obviously)
+- If you have the alias, to give you the means to verify it as well
