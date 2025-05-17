@@ -37,6 +37,10 @@ Even if you cancel the command 0.5 seconds after it began it is already too late
 This tool will help you prevent you from f****ng yourself.
 [As I have done many times in the past](https://github.com/Fuabioo/dontrm/blob/main/main.go#L147).
 
+Here are some examples:
+
+> ⚠️ **THESE WILL DESTROY YOUR SYSTEM!!!**
+
 ##### Base example everyone knows
 
 `rm` won't let you just remove the root unless you provide the `--no-preserve-root` flag e.g.
@@ -51,11 +55,9 @@ export const highlights = ['--no-preserve-root'];
 
 However, you might not know that `/*` actually resolves differently.
 It resolves in all the contents using a glob pattern and thus it won't be
-protected by the `--no-preserve-root` flag.
+protected by the lack of `--no-preserve-root` flag.
 
-**THIS WILL DESTROY YOUR SYSTEM!** ⚠️
-
-export const exampleCode2 = `sudo rm -fr --no-preserve-root /*`;
+export const exampleCode2 = `sudo rm -fr /*`;
 export const fileName2 = 'super-duper-malicious-shell-script.sh';
 
 <Code code={exampleCode2} lang="sh" title={fileName2} mark={highlights} />
@@ -67,7 +69,7 @@ even need to provide `sudo` e.g.
 
 export const exampleCode3 = `
 sudo echo 'henlo fren'
-rm -fr --no-preserve-root /*`;
+rm -fr /*`;
 export const fileName3 = 'hyper-malicious-shell-script.sh';
 
 <Code code={exampleCode3} lang="sh" title={fileName3} mark={highlights} />
