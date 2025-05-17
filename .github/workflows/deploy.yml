@@ -22,8 +22,6 @@ jobs:
         uses: actions/checkout@v4
       - name: Install, build, and upload your site output
         uses: withastro/action@v4
-        with:
-          path: ./page
 
   deploy:
     needs: build
