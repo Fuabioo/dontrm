@@ -1,0 +1,55 @@
+---
+title: Just DON'T!
+description: Safety measure
+template: splash
+hero:
+  tagline: Avoid messing up your system like a clown 🤡
+  image:
+    file: ../../assets/commands.svg
+  actions:
+    - text: How I nuked my PC
+      link: https://youtu.be/p4vBR1WoLYc
+      icon: youtube
+      attrs:
+        target: _blank
+    - text: Read the install script
+      link: https://github.com/Fuabioo/dontrm/blob/page-main/install.sh
+      icon: external
+      variant: minimal
+      attrs:
+        target: _blank
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+#### Installation
+
+<Steps>
+
+1. Execute the installation script. By default should install to `/usr/bin`
+
+   ```sh
+   curl -fsSL https://fuabioo.github.io/dontrm/install.sh | bash
+   ```
+
+2. Verify your installation.
+
+   ```sh
+   dontrm version
+   ```
+
+3. (Optional) Replace `rm` with `dontrm` in your shell configuration (e.g. `.bashrc` `.zshrc`).
+  This can be done by either an alias (for humans using terminal)
+  or a function (if you want scripts to also be affected by this).
+
+   ```sh
+   alias rm="dontrm"
+   ```
+
+   ```sh
+   rm() {
+       dontrm $@
+   }
+   ```
+
+</Steps>
