@@ -42,6 +42,32 @@ var (
 	ErrTopLevelChildAllContents = errors.New("known top level direct child match, all contents match")
 )
 
+var version = "dev"
+
+func main() {
+	args := os.Args[1:]
+	if len(args) > 0 {
+		if args[0] == "version" {
+			println("DON'T rm!", version)
+			return
+		}
+	}
+
+	dryRun := os.Getenv("DRY_RUN") == "true" || os.Getenv("DRY_RUN") == "1"
+	err := checkArgs(args)
+	if err != nil {
+		println(err.Error())
+		os.Exit(1)
+	}
+	if dryRun {
+		os.Exit(0)
+	}
+	cmd := exec.Command("/usr/bin/rm", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	_ = cmd.Run()
+}
+
 func isTopLevelSystemPath(path string) (string, bool) {
 	cleanPath := filepath.Clean(path)
 	value, ok := systemPaths[cleanPath]
@@ -123,20 +149,4 @@ func checkArgs(args []string) error {
 	}
 
 	return nil
-}
-
-func main() {
-	dryRun := os.Getenv("DRY_RUN") == "true" || os.Getenv("DRY_RUN") == "1"
-	err := checkArgs(os.Args[1:])
-	if err != nil {
-		println(err.Error())
-		os.Exit(1)
-	}
-	if dryRun {
-		os.Exit(0)
-	}
-	cmd := exec.Command("/usr/bin/rm", os.Args[1:]...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	_ = cmd.Run()
 }

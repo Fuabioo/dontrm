@@ -58,7 +58,7 @@ DRY_RUN=1 dontrm ./path/or/file/to/remove
 
 ## TODO
 
-- [ ] Set up goreleaser
+- [x] Set up goreleaser
 - [ ] Implement installation script
 - [ ] Configurable rm path
 - [ ] Mount a virtualized environment to test the more dangerous commands
