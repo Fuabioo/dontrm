@@ -3,7 +3,8 @@ import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import catppuccin from "@catppuccin/starlight";
 
-const isGithubPages = process.env.GITHUB_PAGES === "true";
+// const isGithubPages = process.env.GITHUB_PAGES === "true";
+const isGithubPages = false;
 
 // https://astro.build/config
 export default defineConfig({
@@ -12,22 +13,22 @@ export default defineConfig({
     starlight({
       title: "dontrm",
       logo: {
-        src: "./src/assets/logo.svg"
+        src: "./src/assets/logo.svg",
       },
       pagefind: false,
       social: [
         {
           icon: "github",
           label: "GitHub",
-          href: "https://github.com/Fuabioo/dontrm"
-        }
+          href: "https://github.com/Fuabioo/dontrm",
+        },
       ],
       plugins: [
         catppuccin({
           dark: { flavor: "mocha" },
-          light: { flavor: "latte" }
-        })
-      ]
-    })
-  ]
+          light: { flavor: "latte" },
+        }),
+      ],
+    }),
+  ],
 });
