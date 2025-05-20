@@ -4,22 +4,7 @@ Don't remove your system 🤡
 
 ## Installation
 
-TODO download
-
-Set up an alias for user shell usage:
-
-```sh
-alias rm="dontrm"
-```
-
-Or set up a function if you want this to also apply to
-CLI's or scripts:
-
-```sh
-rm() {
-    dontrm $@
-}
-```
+https://dontrm.fuabioo.com/#installation
 
 ## Build from source
 
@@ -37,6 +22,10 @@ go build && sudo mv dontrm /usr/bin/dontrm
 
 Executing the following should be safe:
 (don't test it on your system though)
+
+```sh
+dontrm version
+```
 
 ```sh
 sudo dontrm -fr /*
