@@ -25,3 +25,13 @@ go.work.sum
 .env
 # Added by goreleaser init:
 dist/
+
+# Test artifacts
+coverage.out
+coverage.html
+*.test
+.dockertest.hash
+.dockere2e.hash
+
+# Binary
+dontrm

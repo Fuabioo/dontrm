@@ -1,0 +1,116 @@
+run:
+  timeout: 5m
+  tests: true
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    # Default linters
+    - errcheck      # Check for unchecked errors
+    - gosimple      # Simplify code
+    - govet         # Examine Go source code and reports suspicious constructs
+    - ineffassign   # Detect ineffectual assignments
+    - staticcheck   # Static analysis checks
+    - unused        # Check for unused code
+
+    # Additional important linters
+    - gofmt         # Check if code was gofmt-ed
+    - goimports     # Check import statements are formatted
+    - misspell      # Find commonly misspelled English words
+    - revive        # Fast, configurable, extensible, flexible linter
+    - gosec         # Security-focused linter
+    - unconvert     # Remove unnecessary type conversions
+    - unparam       # Report unused function parameters
+    - bodyclose     # Check HTTP response body is closed
+    - gocritic      # Most opinionated Go linter
+    - gocyclo       # Compute cyclomatic complexity
+    - godot         # Check if comments end in a period
+    - gofumpt       # More strict gofmt
+    - goprintffuncname # Check printf-like functions are named correctly
+    - nakedret      # Find naked returns in functions > X lines
+    - nilerr        # Find code returning nil even when error is not nil
+    - nolintlint    # Report ill-formed or insufficient nolint directives
+    - prealloc      # Find slice declarations that could be preallocated
+    - stylecheck    # Style-focused linter
+    - whitespace    # Detection of leading and trailing whitespace
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+
+  govet:
+    enable-all: true
+    disable:
+      - shadow # Can be too strict
+
+  gocyclo:
+    min-complexity: 15
+
+  gofmt:
+    simplify: true
+
+  goimports:
+    local-prefixes: github.com/Fuabioo/dontrm
+
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - style
+      - performance
+      - experimental
+      - opinionated
+    disabled-checks:
+      - whyNoLint # We don't require explanations for nolint directives
+
+  gosec:
+    excludes:
+      - G204 # Subprocess launching with variable - we need this for rm
+
+  revive:
+    rules:
+      - name: exported
+        disabled: false
+      - name: package-comments
+        disabled: true # Not all packages need comments
+
+  nakedret:
+    max-func-lines: 30
+
+  stylecheck:
+    checks: ["all", "-ST1003"] # Allow ALL_CAPS
+
+  misspell:
+    locale: US
+
+  prealloc:
+    simple: true
+    range-loops: true
+    for-loops: true
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+  exclude-rules:
+    # Exclude some linters from running on tests
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - gosec
+        - gocritic
+        - govet
+      text: "fieldalignment"
+
+    # Allow print statements in main
+    - path: main\.go
+      linters:
+        - forbidigo
+
+  # Show all issues
+  exclude: []
+
+output:
+  sort-results: true
