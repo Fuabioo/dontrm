@@ -16,7 +16,6 @@ linters:
     - unused        # Check for unused code
 
     # Additional important linters
-    - gofmt         # Check if code was gofmt-ed
     - goimports     # Check import statements are formatted
     - misspell      # Find commonly misspelled English words
     - revive        # Fast, configurable, extensible, flexible linter
@@ -27,7 +26,6 @@ linters:
     - gocritic      # Most opinionated Go linter
     - gocyclo       # Compute cyclomatic complexity
     - godot         # Check if comments end in a period
-    - gofumpt       # More strict gofmt
     - goprintffuncname # Check printf-like functions are named correctly
     - nakedret      # Find naked returns in functions > X lines
     - nilerr        # Find code returning nil even when error is not nil
@@ -48,9 +46,6 @@ linters-settings:
 
   gocyclo:
     min-complexity: 15
-
-  gofmt:
-    simplify: true
 
   goimports:
     local-prefixes: github.com/Fuabioo/dontrm

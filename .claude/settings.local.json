@@ -11,7 +11,10 @@
       "Bash(just rebuild-e2e-image:*)",
       "Bash(docker run:*)",
       "Bash(just e2e:*)",
-      "Bash(just test-all:*)"
+      "Bash(just test-all:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh run view:*)",
+      "Bash(golangci-lint:*)"
     ],
     "deny": [],
     "ask": []
