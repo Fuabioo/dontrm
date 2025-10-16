@@ -10,6 +10,7 @@
 
 # Test binary, built with `go test -c`
 *.test
+!Dockerfile.test
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
@@ -30,6 +31,7 @@ dist/
 coverage.out
 coverage.html
 *.test
+!Dockerfile.test
 .dockertest.hash
 .dockere2e.hash
 
