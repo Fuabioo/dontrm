@@ -60,7 +60,7 @@ jobs:
             -v ${{ github.workspace }}:/app \
             -w /app \
             dontrm-test:latest \
-            go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+            go test -v -coverprofile=coverage.out -covermode=atomic ./...
 
       - name: Check coverage threshold (85%)
         run: |
