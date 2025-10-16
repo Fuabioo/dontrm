@@ -16,7 +16,6 @@ linters:
     - unused        # Check for unused code
 
     # Additional important linters
-    - goimports     # Check import statements are formatted
     - misspell      # Find commonly misspelled English words
     - revive        # Fast, configurable, extensible, flexible linter
     - gosec         # Security-focused linter
@@ -46,9 +45,6 @@ linters-settings:
 
   gocyclo:
     min-complexity: 15
-
-  goimports:
-    local-prefixes: github.com/Fuabioo/dontrm
 
   gocritic:
     enabled-tags:
