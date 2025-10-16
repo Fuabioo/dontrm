@@ -64,6 +64,57 @@ alias rm='dontrm'
 alias unsafe-rm='/usr/bin/rm'
 ```
 
+#### Making the Alias Work with Sudo
+
+By default, `sudo rm` won't use your alias because sudo runs commands in a clean environment. To make `sudo rm` use `dontrm`:
+
+**Option 1: Add alias to root's bashrc (Recommended)**
+
+```bash
+# Edit root's bashrc
+sudo nano /root/.bashrc
+
+# Add the alias
+alias rm='dontrm'
+
+# Reload root's bashrc
+sudo bash -c "source /root/.bashrc"
+```
+
+**Option 2: Use sudo with alias expansion**
+
+```bash
+# Add to your ~/.bashrc or ~/.zshrc
+alias sudo='sudo '  # Note the trailing space - this makes sudo expand aliases
+
+# Now 'sudo rm' will use your alias
+# But this affects ALL sudo commands, not just rm
+```
+
+**Option 3: Create a wrapper script**
+
+```bash
+# Create a wrapper script
+sudo tee /usr/local/bin/rm-safe >/dev/null <<'EOF'
+#!/bin/bash
+exec /usr/bin/dontrm "$@"
+EOF
+
+sudo chmod +x /usr/local/bin/rm-safe
+
+# Add to root's bashrc
+sudo bash -c "echo 'alias rm=\"/usr/local/bin/rm-safe\"' >> /root/.bashrc"
+```
+
+**Testing sudo alias:**
+
+```bash
+# Test if sudo uses dontrm
+sudo rm --version  # Should show "DON'T rm!" not GNU rm version
+
+# If it shows GNU rm version, the alias isn't active for sudo
+```
+
 ## Quick Start
 
 ### Basic Usage
