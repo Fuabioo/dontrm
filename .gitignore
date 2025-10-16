@@ -10,6 +10,7 @@
 
 # Test binary, built with `go test -c`
 *.test
+!Dockerfile.test
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
@@ -25,3 +26,14 @@ go.work.sum
 .env
 # Added by goreleaser init:
 dist/
+
+# Test artifacts
+coverage.out
+coverage.html
+*.test
+!Dockerfile.test
+.dockertest.hash
+.dockere2e.hash
+
+# Binary
+dontrm

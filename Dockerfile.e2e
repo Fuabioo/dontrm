@@ -1,0 +1,58 @@
+# Multi-stage Dockerfile for End-to-End Testing
+# Stage 1: Build the dontrm binary
+FROM golang:1.25-alpine AS builder
+
+WORKDIR /build
+
+# Copy go mod files
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Build static binary
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o dontrm .
+
+# Stage 2: Test environment with multiple shells
+FROM ubuntu:latest
+
+# Install required tools: bash, zsh, fish, sudo, and utilities
+RUN apt-get update && apt-get install -y \
+    bash \
+    zsh \
+    fish \
+    sudo \
+    coreutils \
+    util-linux \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy the binary from builder stage
+COPY --from=builder /build/dontrm /usr/bin/dontrm
+RUN chmod +x /usr/bin/dontrm
+
+# Create the E2E control file that signals we're in a safe Docker test environment
+# The test script will check for this file and refuse to run without it
+RUN echo "DOCKER_E2E_TEST_ENVIRONMENT" > /tmp/.docker-e2e-safe-env && \
+    chmod 444 /tmp/.docker-e2e-safe-env
+
+# Create a test user for non-root testing
+RUN useradd -m -s /bin/bash testuser && \
+    echo "testuser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+# Create test directory structure
+RUN mkdir -p /tmp/dontrm-e2e-tests && \
+    chown testuser:testuser /tmp/dontrm-e2e-tests
+
+# Copy test scripts
+COPY e2e_test.sh /usr/local/bin/e2e_test.sh
+RUN chmod +x /usr/local/bin/e2e_test.sh
+
+# Set working directory
+WORKDIR /tmp/dontrm-e2e-tests
+
+# Run tests as testuser (tests will also use sudo where needed)
+USER testuser
+
+# Run the E2E test suite
+CMD ["/usr/local/bin/e2e_test.sh"]

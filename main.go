@@ -1,3 +1,4 @@
+// Package main implements dontrm, a safe wrapper around the rm command that prevents catastrophic system deletions.
 package main
 
 import (
@@ -13,7 +14,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// Define a set of known top-level system paths
+// systemPaths defines a set of known top-level system paths that should be protected.
 var systemPaths = map[string]string{
 	"/":         "/",
 	"/bin":      "/bin",
@@ -40,34 +41,51 @@ var systemPaths = map[string]string{
 }
 
 var (
-	ErrTopLevelPath             = errors.New("known top level match")
-	ErrTopLevelChildAllContents = errors.New("known top level direct child match, all contents match")
+	// ErrTopLevelPath indicates that a top-level system path was matched.
+	ErrTopLevelPath = errors.New("⛔ Blocked dangerous operation: Cannot delete system directory")
+	// ErrTopLevelChildAllContents indicates that all contents of a top-level directory were matched.
+	ErrTopLevelChildAllContents = errors.New("⛔ Blocked dangerous operation: Cannot delete all contents of system directory")
 )
 
 var version = "dev"
 
 func main() {
-	args := os.Args[1:]
-	if len(args) > 0 {
-		if args[0] == "version" {
-			println(lipgloss.NewStyle().Bold(true).Render("DON'T rm!"), version)
-			return
-		}
+	exitCode := run(os.Args[1:], os.Stdout, os.Stderr)
+	os.Exit(exitCode)
+}
+
+// run contains the main application logic and returns an exit code.
+// This function is extracted to be testable without side effects.
+func run(args []string, stdout, stderr *os.File) int {
+	// Handle version command
+	if len(args) > 0 && args[0] == "version" {
+		_, _ = fmt.Fprintln(stdout, lipgloss.NewStyle().Bold(true).Render("DON'T rm!"), version)
+		return 0
 	}
 
+	// Check if dry run mode is enabled
 	dryRun := os.Getenv("DRY_RUN") == "true" || os.Getenv("DRY_RUN") == "1"
-	err := checkArgs(args)
-	if err != nil {
-		println(err.Error())
-		os.Exit(1)
+
+	// Validate arguments for safety
+	if err := checkArgs(args); err != nil {
+		_, _ = fmt.Fprintln(stderr, err.Error())
+		return 1
 	}
+
+	// In dry run mode, exit successfully without executing rm
 	if dryRun {
-		os.Exit(0)
+		return 0
 	}
+
+	// Execute the actual rm command
 	cmd := exec.Command("/usr/bin/rm", args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	_ = cmd.Run()
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+	if err := cmd.Run(); err != nil {
+		return 1
+	}
+
+	return 0
 }
 
 func isTopLevelSystemPath(path string) (string, bool) {
@@ -82,7 +100,7 @@ func sanitize(values []string) string {
 	return strings.Join(values, " ")
 }
 
-// isGlob returns true if the path contains typical globbing characters
+// isGlob returns true if the path contains typical globbing characters.
 func isGlob(path string) bool {
 	return strings.ContainsAny(path, "*?[")
 }
@@ -102,7 +120,6 @@ func echoGlob(pattern string) ([]string, error) {
 }
 
 func evaluatePotentiallyDestructiveActions(tail string) (string, bool) {
-
 	for sysPath := range systemPaths {
 		// evaluate sysPath/*
 		evaluated := filepath.Join(sysPath, "*")
@@ -120,7 +137,6 @@ func evaluatePotentiallyDestructiveActions(tail string) (string, bool) {
 }
 
 func checkArgs(args []string) error {
-
 	tail := make([]string, 0, len(args))
 	stopParsingOptions := false
 	for _, arg := range args {
@@ -140,6 +156,12 @@ func checkArgs(args []string) error {
 		}
 
 		tail = append(tail, arg)
+	}
+
+	// If tail is empty (no files specified), skip destructive action check
+	// The actual rm command will handle empty args appropriately
+	if len(tail) == 0 {
+		return nil
 	}
 
 	// any potentially destructive path e.g. /usr/bin/*

@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(just lint)",
+      "Bash(go mod:*)",
+      "Bash(just build)",
+      "Bash(./dontrm version)",
+      "Bash(just clean:*)",
+      "Bash(just coverage:*)",
+      "Bash(cat:*)",
+      "Bash(just rebuild-e2e-image:*)",
+      "Bash(docker run:*)",
+      "Bash(just e2e:*)",
+      "Bash(just test-all:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh run view:*)",
+      "Bash(golangci-lint:*)",
+      "Bash(just lint-ci:*)",
+      "Bash(just test:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

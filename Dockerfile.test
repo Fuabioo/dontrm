@@ -1,0 +1,25 @@
+FROM golang:1.25-alpine
+
+# Install required tools
+RUN apk add --no-cache \
+    git \
+    bash \
+    ca-certificates
+
+# Create the control file that signals we're in a safe Docker test environment
+# Tests will check for this file and refuse to run without it
+RUN echo "DOCKER_TEST_ENVIRONMENT" > /tmp/.docker-test-safe-env && \
+    chmod 444 /tmp/.docker-test-safe-env
+
+# Set working directory
+WORKDIR /app
+
+# Copy go mod files first for better layer caching
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Default command runs tests with coverage
+CMD ["go", "test", "-v", "-coverprofile=coverage.out", "-covermode=atomic", "./..."]
