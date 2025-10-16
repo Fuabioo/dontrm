@@ -1,3 +1,4 @@
+// Package main implements dontrm, a safe wrapper around the rm command that prevents catastrophic system deletions.
 package main
 
 import (
@@ -58,7 +59,7 @@ func main() {
 func run(args []string, stdout, stderr *os.File) int {
 	// Handle version command
 	if len(args) > 0 && args[0] == "version" {
-		_, _ = fmt.Fprintln(stdout, lipgloss.NewStyle().Bold(true).Render("DON'T rm!"), version) //nolint:errcheck // output errors can't be meaningfully handled
+		_, _ = fmt.Fprintln(stdout, lipgloss.NewStyle().Bold(true).Render("DON'T rm!"), version)
 		return 0
 	}
 
@@ -67,7 +68,7 @@ func run(args []string, stdout, stderr *os.File) int {
 
 	// Validate arguments for safety
 	if err := checkArgs(args); err != nil {
-		_, _ = fmt.Fprintln(stderr, err.Error()) //nolint:errcheck // output errors can't be meaningfully handled
+		_, _ = fmt.Fprintln(stderr, err.Error())
 		return 1
 	}
 

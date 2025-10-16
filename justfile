@@ -59,6 +59,16 @@ lint:
         exit 1; \
     fi
 
+# Run linting with CI golangci-lint version (v2.5.0) in Docker
+lint-ci:
+    @echo "Running linting with CI golangci-lint version (v2.5.0) in Docker..."
+    @docker run --rm \
+        -v $(pwd):/app \
+        -w /app \
+        golang:1.25-alpine \
+        sh -c "apk add --no-cache git curl && git config --global --add safe.directory /app && curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v2.5.0 && go fmt ./... && golangci-lint run --timeout=5m"
+    @echo "\n✅ CI linting passed!"
+
 # Clean build artifacts and coverage reports
 clean:
     rm -f dontrm coverage.out

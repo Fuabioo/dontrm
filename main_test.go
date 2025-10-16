@@ -453,16 +453,14 @@ func TestRun(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer func() { _ = os.Remove(tmpStdout.Name()) }() //nolint:errcheck // cleanup in tests
-			defer func() { _ = tmpStdout.Close() }()           //nolint:errcheck // cleanup in tests
-
+			defer func() { _ = os.Remove(tmpStdout.Name()) }()
+			defer func() { _ = tmpStdout.Close() }()
 			tmpStderr, err := os.CreateTemp("", "stderr")
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer func() { _ = os.Remove(tmpStderr.Name()) }() //nolint:errcheck // cleanup in tests
-			defer func() { _ = tmpStderr.Close() }()           //nolint:errcheck // cleanup in tests
-
+			defer func() { _ = os.Remove(tmpStderr.Name()) }()
+			defer func() { _ = tmpStderr.Close() }()
 			// Set DRY_RUN if specified
 			if test.dryRun != "" {
 				t.Setenv("DRY_RUN", test.dryRun)
@@ -480,9 +478,9 @@ func TestRun(t *testing.T) {
 
 			// Check output if requested
 			if test.checkOutput {
-				_, _ = tmpStdout.Seek(0, 0) //nolint:errcheck // test helper
+				_, _ = tmpStdout.Seek(0, 0)
 				output := make([]byte, 1000)
-				n, _ := tmpStdout.Read(output) //nolint:errcheck // test helper
+				n, _ := tmpStdout.Read(output)
 				outputStr := string(output[:n])
 
 				if !strings.Contains(outputStr, test.expectOutput) {
@@ -533,16 +531,14 @@ func TestRunWithDifferentDryRunValues(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer func() { _ = os.Remove(tmpStdout.Name()) }() //nolint:errcheck // cleanup in tests
-			defer func() { _ = tmpStdout.Close() }()           //nolint:errcheck // cleanup in tests
-
+			defer func() { _ = os.Remove(tmpStdout.Name()) }()
+			defer func() { _ = tmpStdout.Close() }()
 			tmpStderr, err := os.CreateTemp("", "stderr")
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer func() { _ = os.Remove(tmpStderr.Name()) }() //nolint:errcheck // cleanup in tests
-			defer func() { _ = tmpStderr.Close() }()           //nolint:errcheck // cleanup in tests
-
+			defer func() { _ = os.Remove(tmpStderr.Name()) }()
+			defer func() { _ = tmpStderr.Close() }()
 			t.Setenv("DRY_RUN", test.dryRunValue)
 
 			exitCode := run(test.args, tmpStdout, tmpStderr)

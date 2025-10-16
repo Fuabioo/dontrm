@@ -9,7 +9,6 @@ linters:
   enable:
     # Default linters
     - errcheck      # Check for unchecked errors
-    - gosimple      # Simplify code
     - govet         # Examine Go source code and reports suspicious constructs
     - ineffassign   # Detect ineffectual assignments
     - staticcheck   # Static analysis checks
@@ -30,7 +29,6 @@ linters:
     - nilerr        # Find code returning nil even when error is not nil
     - nolintlint    # Report ill-formed or insufficient nolint directives
     - prealloc      # Find slice declarations that could be preallocated
-    - stylecheck    # Style-focused linter
     - whitespace    # Detection of leading and trailing whitespace
 
 linters-settings:
@@ -69,9 +67,6 @@ linters-settings:
 
   nakedret:
     max-func-lines: 30
-
-  stylecheck:
-    checks: ["all", "-ST1003"] # Allow ALL_CAPS
 
   misspell:
     locale: US

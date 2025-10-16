@@ -14,7 +14,9 @@
       "Bash(just test-all:*)",
       "Bash(gh pr checks:*)",
       "Bash(gh run view:*)",
-      "Bash(golangci-lint:*)"
+      "Bash(golangci-lint:*)",
+      "Bash(just lint-ci:*)",
+      "Bash(just test:*)"
     ],
     "deny": [],
     "ask": []
