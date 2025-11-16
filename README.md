@@ -54,66 +54,180 @@ just install
 
 ### Alias Setup (Optional but Recommended)
 
-To make `rm` use `dontrm` automatically:
+To make `rm` use `dontrm` automatically, add an alias to your shell configuration:
 
+**Bash** (`~/.bashrc`):
 ```bash
-# Add to ~/.bashrc or ~/.zshrc
 alias rm='dontrm'
+alias unsafe-rm='/usr/bin/rm'  # Keep access to real rm (use with EXTREME caution)
+```
 
-# Keep access to real rm if needed (use with EXTREME caution)
+**Zsh** (`~/.zshrc`):
+```zsh
+alias rm='dontrm'
 alias unsafe-rm='/usr/bin/rm'
+```
+
+**Fish** (`~/.config/fish/config.fish`):
+```fish
+alias rm 'dontrm'
+alias unsafe-rm '/usr/bin/rm'
+```
+
+**Sh/Dash** (`~/.profile`):
+```sh
+alias rm='dontrm'
+alias unsafe-rm='/usr/bin/rm'
+```
+
+After adding the alias, restart your shell or source the config file:
+```bash
+source ~/.bashrc    # For bash
+source ~/.zshrc     # For zsh
+source ~/.profile   # For sh/dash
+# For fish, just restart the shell
 ```
 
 #### Making the Alias Work with Sudo
 
-By default, `sudo rm` won't use your alias because sudo runs commands in a clean environment. To make `sudo rm` use `dontrm`:
+By default, `sudo rm` won't use your alias because sudo runs commands in a clean environment. Here are **shell-agnostic** approaches to make `sudo rm` use `dontrm`:
 
-**Option 1: Add alias to root's bashrc (Recommended)**
+---
+
+**Option 1: System-Wide Installation (Recommended - Works for All Shells)**
+
+Install `dontrm` system-wide so it's available to all users including root:
 
 ```bash
-# Edit root's bashrc
-sudo nano /root/.bashrc
+# Build dontrm
+go build -ldflags="-s -w" -o dontrm .
 
-# Add the alias
+# Install to system location
+sudo install -m 755 dontrm /usr/local/bin/dontrm
+
+# Optional: Create symlink so 'rm' points to dontrm
+sudo ln -sf /usr/local/bin/dontrm /usr/local/bin/rm
+
+# Ensure /usr/local/bin is in PATH before /usr/bin
+# Add to /etc/environment or /etc/profile:
+export PATH="/usr/local/bin:$PATH"
+```
+
+**Pros**: Works immediately for all users, all shells, and `sudo` commands
+**Cons**: System-wide change affects all users
+**Security**: High - no shell configuration needed
+
+---
+
+**Option 2: Shell-Specific Alias for Root User**
+
+Add an alias to root's shell configuration. **Note**: This only works for interactive sudo shells (`sudo -i`, `sudo -s`, `sudo bash`), not for direct commands like `sudo rm file.txt`.
+
+**For Bash** (root's `~/.bashrc` or `/root/.bashrc`):
+```bash
+sudo tee -a /root/.bashrc >/dev/null <<'EOF'
+# Use dontrm instead of rm
 alias rm='dontrm'
-
-# Reload root's bashrc
-sudo bash -c "source /root/.bashrc"
-```
-
-**Option 2: Use sudo with alias expansion**
-
-```bash
-# Add to your ~/.bashrc or ~/.zshrc
-alias sudo='sudo '  # Note the trailing space - this makes sudo expand aliases
-
-# Now 'sudo rm' will use your alias
-# But this affects ALL sudo commands, not just rm
-```
-
-**Option 3: Create a wrapper script**
-
-```bash
-# Create a wrapper script
-sudo tee /usr/local/bin/rm-safe >/dev/null <<'EOF'
-#!/bin/bash
-exec /usr/bin/dontrm "$@"
 EOF
-
-sudo chmod +x /usr/local/bin/rm-safe
-
-# Add to root's bashrc
-sudo bash -c "echo 'alias rm=\"/usr/local/bin/rm-safe\"' >> /root/.bashrc"
 ```
 
-**Testing sudo alias:**
+**For Zsh** (root's `/root/.zshrc`):
+```zsh
+sudo tee -a /root/.zshrc >/dev/null <<'EOF'
+# Use dontrm instead of rm
+alias rm='dontrm'
+EOF
+```
+
+**For Fish** (root's `/root/.config/fish/config.fish`):
+```fish
+# Create config directory if it doesn't exist
+sudo mkdir -p /root/.config/fish
+
+# Add alias
+sudo tee -a /root/.config/fish/config.fish >/dev/null <<'EOF'
+# Use dontrm instead of rm
+alias rm 'dontrm'
+EOF
+```
+
+**Pros**: Simple, doesn't affect non-sudo commands
+**Cons**: Only works for `sudo -i` or `sudo bash`, not `sudo rm file.txt`
+**Security**: High - isolated to root's shell
+
+---
+
+**Option 3: Alias Expansion in Bash/Zsh (Shell-Specific)**
+
+**⚠️ Only works in Bash and Zsh, not Fish or other shells.**
+
+Add to your user's shell config (`~/.bashrc` or `~/.zshrc`):
+```bash
+alias sudo='sudo '  # Trailing space makes sudo expand aliases
+```
+
+**Pros**: Works for `sudo rm file.txt` commands
+**Cons**: Only works in bash/zsh, affects ALL sudo commands, can cause unexpected behavior
+**Security**: Medium - changes sudo behavior globally
+
+---
+
+**Option 4: Configure sudoers (Advanced - Shell Agnostic)**
+
+Preserve environment variables through sudo by editing `/etc/sudoers`:
 
 ```bash
-# Test if sudo uses dontrm
-sudo rm --version  # Should show "DON'T rm!" not GNU rm version
+# Edit sudoers safely
+sudo visudo
 
-# If it shows GNU rm version, the alias isn't active for sudo
+# Add this line to preserve alias-related environment
+Defaults env_keep += "BASH_FUNC_*"
 ```
+
+**⚠️ Warning**: This has security implications and may not work reliably across all shells.
+
+**Pros**: Shell-agnostic
+**Cons**: Complex, security trade-offs, unreliable
+**Security**: Lower - preserves environment variables
+
+---
+
+### Comparison Table
+
+| Approach | Direct `sudo rm` | Interactive `sudo -i` | Shell Agnostic | Complexity | Recommended |
+|----------|------------------|----------------------|----------------|------------|-------------|
+| System-wide install | ✅ Yes | ✅ Yes | ✅ Yes | Medium | ⭐ **Best** |
+| Root shell alias | ❌ No | ✅ Yes | ✅ Yes | Easy | ✅ Good |
+| Alias expansion | ✅ Yes* | ✅ Yes | ❌ No (bash/zsh only) | Easy | ⚠️ Limited |
+| sudoers config | ⚠️ Maybe | ⚠️ Maybe | ✅ Yes | Hard | ❌ Avoid |
+
+*Only for bash/zsh
+
+---
+
+### Testing Your Setup
+
+```bash
+# Test regular dontrm (works for all methods)
+dontrm version
+# Expected output: DON'T rm! dev
+
+# Test sudo with interactive shell (works for Options 1 & 2)
+sudo -i
+rm version  # Should show "DON'T rm!" not GNU rm
+exit
+
+# Test direct sudo rm (only works for Options 1 & 3)
+DRY_RUN=1 sudo rm -rf /etc
+# Expected: ⛔ Blocked dangerous operation
+
+# If you see GNU rm output or actual deletion attempts, the alias isn't working
+```
+
+**Troubleshooting:**
+- If `sudo rm` shows GNU rm, try `sudo -i` then `rm` to test if the root alias works
+- For fish users: Shell aliases don't transfer to sudo by default - use Option 1 (system-wide install)
+- Verify dontrm is installed: `which dontrm` and `sudo which dontrm`
 
 ## Quick Start
 
