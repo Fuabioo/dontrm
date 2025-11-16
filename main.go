@@ -89,6 +89,7 @@ func run(args []string, stdout, stderr *os.File) int {
 	}
 
 	// Execute the actual rm command
+	// #nosec G204 - rmPath is validated via exec.LookPath or DONTRM_RM_PATH env var, args are validated by checkArgs()
 	cmd := exec.Command(rmPath, args...)
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr

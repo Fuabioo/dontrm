@@ -726,7 +726,7 @@ func TestRmNotFoundInPath(t *testing.T) {
 	// Set PATH to empty to ensure rm won't be found
 	t.Setenv("PATH", "")
 	t.Setenv("DONTRM_RM_PATH", "") // Don't use custom path
-	t.Setenv("DRY_RUN", "")          // Disable dry run
+	t.Setenv("DRY_RUN", "")        // Disable dry run
 
 	exitCode := run([]string{"/tmp/test.txt"}, tmpStdout, tmpStderr)
 
