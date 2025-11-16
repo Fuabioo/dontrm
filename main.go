@@ -77,11 +77,26 @@ func run(args []string, stdout, stderr *os.File) int {
 		return 0
 	}
 
+	// Find the rm command (support cross-platform and custom paths)
+	rmPath := os.Getenv("DONTRM_RM_PATH")
+	if rmPath == "" {
+		var err error
+		rmPath, err = exec.LookPath("rm")
+		if err != nil {
+			_, _ = fmt.Fprintln(stderr, "Error: rm command not found in PATH")
+			return 127 // Command not found
+		}
+	}
+
 	// Execute the actual rm command
-	cmd := exec.Command("/usr/bin/rm", args...)
+	cmd := exec.Command(rmPath, args...)
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 	if err := cmd.Run(); err != nil {
+		// Preserve the actual exit code from rm
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			return exitErr.ExitCode()
+		}
 		return 1
 	}
 

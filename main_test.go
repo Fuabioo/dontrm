@@ -587,3 +587,161 @@ func TestDoubleDashStopParsingOptions(t *testing.T) {
 		})
 	}
 }
+
+// TestErrorCodePropagation tests that exit codes from rm are properly preserved.
+func TestErrorCodePropagation(t *testing.T) {
+	tests := []struct {
+		name         string
+		args         []string
+		expectedCode int
+		description  string
+	}{
+		{
+			name:         "non-existent file",
+			args:         []string{"/tmp/definitely-does-not-exist-12345"},
+			expectedCode: 1, // rm returns 1 for non-existent files
+			description:  "rm should return exit code 1 for non-existent files",
+		},
+		{
+			name:         "invalid option",
+			args:         []string{"--invalid-option-xyz"},
+			expectedCode: 1, // rm returns 1 for invalid options
+			description:  "rm should return exit code 1 for invalid options",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			tmpStdout, err := os.CreateTemp("", "stdout")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() { _ = os.Remove(tmpStdout.Name()) }()
+			defer func() { _ = tmpStdout.Close() }()
+
+			tmpStderr, err := os.CreateTemp("", "stderr")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() { _ = os.Remove(tmpStderr.Name()) }()
+			defer func() { _ = tmpStderr.Close() }()
+
+			// Don't set DRY_RUN so the actual rm command runs
+			t.Setenv("DRY_RUN", "")
+
+			exitCode := run(test.args, tmpStdout, tmpStderr)
+
+			if exitCode != test.expectedCode {
+				t.Errorf("%s: expected exit code %d, got %d",
+					test.description, test.expectedCode, exitCode)
+			}
+		})
+	}
+}
+
+// TestRmPathLookup tests that rm binary is found correctly.
+func TestRmPathLookup(t *testing.T) {
+	tests := []struct {
+		name         string
+		rmPathEnv    string
+		args         []string
+		expectedCode int
+		description  string
+	}{
+		{
+			name:         "uses default PATH lookup",
+			rmPathEnv:    "",
+			args:         []string{"version"},
+			expectedCode: 0,
+			description:  "should find rm in PATH",
+		},
+		{
+			name:         "uses custom DONTRM_RM_PATH",
+			rmPathEnv:    "/bin/rm",
+			args:         []string{"version"},
+			expectedCode: 0,
+			description:  "should use custom rm path from env var",
+		},
+		{
+			name:         "invalid rm path in dry run",
+			rmPathEnv:    "/nonexistent/rm",
+			args:         []string{"/tmp/test.txt"},
+			expectedCode: 0, // Dry run passes validation and exits before execution
+			description:  "should pass validation in dry run even with invalid rm path",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			tmpStdout, err := os.CreateTemp("", "stdout")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() { _ = os.Remove(tmpStdout.Name()) }()
+			defer func() { _ = tmpStdout.Close() }()
+
+			tmpStderr, err := os.CreateTemp("", "stderr")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() { _ = os.Remove(tmpStderr.Name()) }()
+			defer func() { _ = tmpStderr.Close() }()
+
+			// Set custom rm path if specified
+			if test.rmPathEnv != "" {
+				t.Setenv("DONTRM_RM_PATH", test.rmPathEnv)
+			}
+
+			// Use dry run for version test, but not for others
+			if test.args[0] != "version" {
+				t.Setenv("DRY_RUN", "1")
+			}
+
+			exitCode := run(test.args, tmpStdout, tmpStderr)
+
+			if exitCode != test.expectedCode {
+				t.Errorf("%s: expected exit code %d, got %d",
+					test.description, test.expectedCode, exitCode)
+			}
+		})
+	}
+}
+
+// TestRmNotFoundInPath tests behavior when rm is not found in PATH.
+func TestRmNotFoundInPath(t *testing.T) {
+	tmpStdout, err := os.CreateTemp("", "stdout")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = os.Remove(tmpStdout.Name()) }()
+	defer func() { _ = tmpStdout.Close() }()
+
+	tmpStderr, err := os.CreateTemp("", "stderr")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = os.Remove(tmpStderr.Name()) }()
+	defer func() { _ = tmpStderr.Close() }()
+
+	// Set PATH to empty to ensure rm won't be found
+	t.Setenv("PATH", "")
+	t.Setenv("DONTRM_RM_PATH", "") // Don't use custom path
+	t.Setenv("DRY_RUN", "")          // Disable dry run
+
+	exitCode := run([]string{"/tmp/test.txt"}, tmpStdout, tmpStderr)
+
+	// Should return 127 (command not found)
+	if exitCode != 127 {
+		t.Errorf("Expected exit code 127 when rm not found, got %d", exitCode)
+	}
+
+	// Check that error message was written to stderr
+	_, _ = tmpStderr.Seek(0, 0)
+	stderrContent := make([]byte, 1000)
+	n, _ := tmpStderr.Read(stderrContent)
+	stderrStr := string(stderrContent[:n])
+
+	if !strings.Contains(stderrStr, "rm command not found") {
+		t.Errorf("Expected error message about rm not found, got: %q", stderrStr)
+	}
+}

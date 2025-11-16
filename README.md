@@ -152,13 +152,46 @@ dontrm -rf /some/path/
 
 `DRY_RUN` accepts `1`, `true`, or any truthy value.
 
+## Configuration
+
+`dontrm` supports the following environment variables for customization:
+
+### Environment Variables
+
+#### `DRY_RUN`
+- **Description**: Test mode - performs safety checks but doesn't execute deletions
+- **Values**: `1`, `true` (case-insensitive)
+- **Default**: Not set (deletions execute normally)
+- **Example**: `DRY_RUN=1 dontrm -rf /some/path/`
+
+#### `DONTRM_RM_PATH`
+- **Description**: Custom path to the `rm` binary
+- **Values**: Absolute path to `rm` executable
+- **Default**: Automatically detected via `PATH` lookup
+- **Use Case**: Custom `rm` installations or testing
+- **Example**: `DONTRM_RM_PATH=/bin/rm dontrm file.txt`
+
+### Cross-Platform Support
+
+`dontrm` works on:
+- **Linux** (all distributions)
+- **macOS** (automatically finds `rm` in `/bin/rm` or `/usr/bin/rm`)
+- **Windows** (limited - requires WSL or Cygwin with `rm` installed)
+
+The `rm` binary is automatically detected using your system's `PATH`. If you have a custom `rm` installation, use the `DONTRM_RM_PATH` environment variable to specify its location.
+
+**Platform-Specific Notes:**
+- **Linux**: Default `rm` path is typically `/usr/bin/rm` or `/bin/rm`
+- **macOS**: Default `rm` path is typically `/bin/rm`
+- **Custom installations**: Set `DONTRM_RM_PATH` to your `rm` location
+
 ## How It Works
 
 1. **Argument Validation**: Before executing any deletion, `dontrm` inspects all arguments
 2. **Pattern Matching**: Checks arguments against known dangerous system paths
 3. **Glob Expansion**: Evaluates wildcards to detect if they expand to system directories
 4. **Safety First**: If any dangerous pattern is detected, operation is blocked with clear error
-5. **Otherwise, Execute**: If safe, passes arguments directly to `/usr/bin/rm`
+5. **Otherwise, Execute**: If safe, locates `rm` in your PATH and executes it with the arguments
 
 ```
 ┌─────────────┐
@@ -181,7 +214,12 @@ dontrm -rf /some/path/
             │
             ▼
 ┌─────────────────────────┐
-│ Execute /usr/bin/rm     │──── ✅
+│ Find rm in PATH         │
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│ Execute rm with args    │──── ✅
 └─────────────────────────┘
 ```
 
